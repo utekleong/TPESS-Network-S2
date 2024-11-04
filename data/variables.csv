@@ -1,4 +1,5 @@
 ﻿type,code,label,short_desc,desc
+situational_exp,SE_2,nse,,To what degree were the situations you encountered negative?
 tpess,TPESS_1,tpess1,,Negative thoughts keep intruding into my mind.
 tpess,TPESS_2,tpess2,,Unable to know what to expect next is frightening to me.
 tpess,TPESS_3,tpess3,,My feelings of distress or being upset scare me.
@@ -9,15 +10,15 @@ tpess,TPESS_7,tpess7,,"I have thoughts saying, “I dislike myself”."
 tpess,TPESS_8,tpess8,,"I have thoughts saying, “What other people think about me is important”."
 tpess,TPESS_9,tpess9,,I have been expecting bad things to happen in my relationships with others.
 tpess,TPESS_10,tpess10,,I feel that I have little or no control over my life.
-symptom,SYMP_1,pleasure,,To what degree have you been experiencing little interest or pleasure in doing things?
-symptom,SYMP_2,dep_mood,,"To what degree have you been feeling down, depressed or hopeless?"
-symptom,SYMP_3,failure,,To what degree have you been feeling bad about yourself – or that you are a failure or have let yourself or your family down?
+symptom,SYMP_1,anh,,To what degree have you been experiencing little interest or pleasure in doing things?
+symptom,SYMP_2,dep,,"To what degree have you been feeling down, depressed or hopeless?"
+symptom,SYMP_3,fail,,To what degree have you been feeling bad about yourself – or that you are a failure or have let yourself or your family down?
 symptom,SYMP_4,restless,,To what degree have you felt restless?
 symptom,SYMP_5,anx,,To what degree have you felt anxious or worried?
-symptom,SYMP_6,afraid,,"To what degree have you felt afraid, as if something awful might happen?"
+symptom,SYMP_6,fear,,"To what degree have you felt afraid, as if something awful might happen?"
 symptom,SYMP_7,avoid,,To what degree have you avoided situations that made you anxious?
-symptom,SYMP_8,embarras,,"To what degree have you had thoughts of being rejected, humiliated, embarrassed, ridiculed, or offending others?"
+symptom,SYMP_8,st,,"To what degree have you had thoughts of being rejected, humiliated, embarrassed, ridiculed, or offending others?"
 symptom,SYMP_9,panic,, To what degree have you experienced a sharp rise in anxiety or fearfulness?
-symptom,SYMP_10,unplesant_thoughts,,"To what degree do you have unpleasant thoughts, urges, or images repeatedly entering your mind?"
-symptom,SYMP_11,rep_thoughts,,To what degree do you feel driven to perform certain behaviors or mental acts over and over again?
+symptom,SYMP_10,ut,,"To what degree do you have unpleasant thoughts, urges, or images repeatedly entering your mind?"
+symptom,SYMP_11,rt,,To what degree do you feel driven to perform certain behaviors or mental acts over and over again?
 symptom,SYMP_12,conc,,"To what degree have you had trouble concentrating on things, such as reading the newspaper or watching television."
