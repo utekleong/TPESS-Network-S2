@@ -1,8 +1,20 @@
-#loading packages
+##################################################################
+##                       Loading packages                       ##
+##################################################################
+#loading required data
 library(tidyverse)
 
+
+#################################################################
+##                        Baseline data                        ##
+#################################################################
+
+
+##################################################################
+##                           EMA data                           ##
+##################################################################
 #loading data
-data <- readxl::read_excel("./data/data_raw.xlsx", sheet = 1)
+data <- readxl::read_excel("./data/ema_raw.xlsx", sheet = 1)
 
 variables <- read.csv("./data/variables.csv")
 
@@ -40,7 +52,7 @@ data_clean <- data_raw %>%
 
 #for documentation: here are the data that the above code removes
 data_dirty <- anti_join(data_raw, data_clean)
-#write.csv(data_dirty, "./data/data_removed.csv")
+#write.csv(data_dirty, "./data/ema_removed.csv")
 
 #selecting relevant variables for network estimation
 data_clean <- data_clean %>% 
@@ -51,4 +63,4 @@ names(data_clean)[6:28] <- variables$label #to clean up labels
 data_clean <- data_clean %>% 
   mutate(time = row_number(), .after = scheduled_start_local) #ranges from 1 to 63
 
-#write.csv(data_clean, "./data/data_clean.csv", row.names = FALSE)
+#write.csv(data_clean, "./data/ema_clean.csv", row.names = FALSE)

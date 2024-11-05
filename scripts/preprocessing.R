@@ -6,11 +6,11 @@ library(tidyverse)
 library(mlVAR)
 
 #loading and cleaning data:
-data <- read.csv("./data/data_clean.csv")
-data <- data %>%
-  mutate(tpess_mean = rowMeans(select(data, starts_with("tpess")))) #computing mean score for 10-item TPESS
-  
-#removing participants who responded to less than 20 EMAs
+data_raw <- read.csv("./data/ema_clean.csv")
+data <- data_raw %>%
+  mutate(core = rowMeans(select(data_raw, starts_with("tpess")))) #computing mean score for 10-item TPESS
+
+#removing participants who responded to less than 21 EMAs
 occasion_count <- data %>%
   group_by(id) %>%
   filter(has_data == "true") %>%
@@ -18,7 +18,56 @@ occasion_count <- data %>%
   filter(n > 20)
 data <- data %>%
   filter(id %in% occasion_count$id) %>% 
-  select(id, time, day, occasion, nse, anh:tpess_mean)
+  select(id, time, day, occasion, nse, anh:core)
+
+##################################################################
+##                       EMA descriptives                       ##
+##################################################################
+#how many EMAs were completed in total?:
+data_raw %>% 
+  count(has_data)
+
+#how many EMAs were completed by participants with >20 measurement occasions:
+ema_20 <- data_raw %>% 
+  filter(id %in% occasion_count$id) %>% #this subsets full dataset to the sample of participants who provided >20 measurement occasions.
+  filter(has_data == "true")
+  
+n_20 <- length(unique(ema_20$id)) #number of participants with >20 measurement occasions
+n_20
+
+m_20 <- nrow(ema_20) #total number of measurement occasions provided by participants with >20 measurement occasions
+m_20
+
+m_20/n_20 #average number of measurement occasions completed
+
+#computing person-specific means of EMA variables:
+person_mean <- data %>% 
+  select(id,nse, anh:core) %>% 
+  group_by(id) %>% 
+  summarise_all(~ mean(.x, na.rm = TRUE))
+#write.csv(person_mean, "./data/ema_person_mean.csv")
+
+#computing person-specific SDs of EMA variables:
+person_sd <- data %>% 
+  select(id,nse, anh:core) %>% 
+  group_by(id) %>% 
+  summarise_all(~ sd(.x, na.rm = TRUE))
+
+#computing average and SDs of person-specific means:
+study_mean <- person_mean %>% 
+  select(!id) %>% 
+  pivot_longer(cols = everything()) %>% 
+  group_by(name) %>% 
+  summarise(mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE))
+
+#computing average and SDs of person-specific SDs:
+study_sd <- person_sd %>% 
+  select(!id) %>% 
+  pivot_longer(cols = everything()) %>% 
+  group_by(name) %>% 
+  summarise(mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE))
 
 #################################################################
 ##                       Detrending data                       ##
@@ -60,19 +109,22 @@ grouping <- list("NSE" = c(1),
                  "TPESS" = c(14))
 
 #temporal network:
-plot(net, "temporal", groups = grouping, nonsig = "hide", rule = "and", 
+plot(net, "temporal", nonsig = "hide", rule = "and", 
      layout = "spring", theme = "colorblind", alpha = .01,
      curve = 0.5, curveAll = TRUE,
+     groups = grouping,
      filename = "temporalnet", filetype = "png", width = 20, height = 20)
 
 #contemporaneous network:
-plot(net, groups = grouping, "contemporaneous", nonsig = "hide", rule = "and", 
+plot(net, "contemporaneous", nonsig = "hide", rule = "and", 
      layout = "spring", theme = "colorblind", alpha = .01,
      curve = 0.5, curveAll = FALSE, repulsion = 0.8,
+     groups = grouping,
      filename = "contempnet", filetype = "png", width = 20, height = 20)
 
 #between-subjects network:
-plot(net, groups = grouping, "between", nonsig = "hide", rule = "and", 
+plot(net, "between", nonsig = "hide", rule = "and", 
      layout = "spring", theme = "colorblind", alpha = .01,
      curve = 0.5, curveAll = FALSE, repulsion = 0.8,
+     groups = grouping, 
      filename = "betweennet", filetype = "png", width = 20, height = 20)
