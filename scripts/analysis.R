@@ -4,6 +4,7 @@
 #loading packages:
 library(tidyverse)
 library(mlVAR)
+library(flextable)
 
 #loading baseline data:
 baseline_raw <- read.csv("./data/baseline_clean.csv")
@@ -86,6 +87,11 @@ mean(baseline_clean$tpess_mean) %>%
 sd(baseline_clean$tpess_mean) %>%
   round(digits = 2)
 
+#calculating reliability for TPESS (raw_alpha of output)
+baseline_clean %>% 
+  select(starts_with("tpess"), -tpess_mean) %>% 
+  psych::alpha()
+
 #excluded participants
 baseline_excluded <- baseline_raw  %>% 
   filter(!(id %in% occasion_count$id))
@@ -127,7 +133,6 @@ person_mean <- ema_clean %>%
   select(id,nse, anh:core) %>% 
   group_by(id) %>% 
   summarise_all(~ mean(.x, na.rm = TRUE))
-#write.csv(person_mean, "./data/ema_person_mean.csv")
 
 #computing person-specific SDs of EMA variables:
 person_sd <- ema_clean %>% 
@@ -140,16 +145,32 @@ study_mean <- person_mean %>%
   select(!id) %>% 
   pivot_longer(cols = everything()) %>% 
   group_by(name) %>% 
-  summarise(mean = mean(value, na.rm = TRUE),
-            sd = sd(value, na.rm = TRUE))
+  summarise(psm_mean = mean(value, na.rm = TRUE),
+            psm_sd = sd(value, na.rm = TRUE))
 
 #computing average and SDs of person-specific SDs:
 study_sd <- person_sd %>% 
   select(!id) %>% 
   pivot_longer(cols = everything()) %>% 
   group_by(name) %>% 
-  summarise(mean = mean(value, na.rm = TRUE),
-            sd = sd(value, na.rm = TRUE))
+  summarise(pssd_mean = mean(value, na.rm = TRUE),
+            pssd_sd = sd(value, na.rm = TRUE))
+
+#constructing table for manuscript
+persondesc_data <- left_join(study_mean,study_sd, by = "name")
+persondesc_data[2:5] <- round(persondesc_data[2:5], digits = 2)
+persondesc_data <- mutate(persondesc_data, 
+                          psm = paste0(psm_mean, " ","(", psm_sd, ")"),
+                          pssd = paste0(pssd_mean, " ","(", pssd_sd, ")"), .keep = "unused")
+
+persondesc_table <- persondesc_data %>% 
+  arrange(name) %>% 
+  flextable() %>% 
+  set_header_labels(name = "Node label",
+                    psm = "Person-specific mean",
+                    pssd = "Person-specific standard deviation") %>% 
+  autofit()
+#print(persondesc_table, preview = "docx")
 
 #################################################################
 ##                       Detrending data                       ##
@@ -179,10 +200,10 @@ ema_detrended[5:18] <- data_residuals[5:18]
 ##################################################################
 # #fitting the network:
 vars <- colnames(ema_detrended[5:18])
-net <- mlVAR(ema_detrended, vars = vars,
-             idvar = "id", dayvar = "day",
-             temporal = "correlated", contemporaneous = "correlated")
-saveRDS(net, "./data/RDS/network_correlated.RDS")
+# net <- mlVAR(ema_detrended, vars = vars,
+#              idvar = "id", dayvar = "day",
+#              temporal = "correlated", contemporaneous = "correlated")
+# saveRDS(net, "./data/RDS/network_correlated.RDS")
 net <- readRDS("./data/RDS/network_correlated.RDS") #load RDS file instead; fitting network with temporal/contempraneous = "correlated" is extremely computationally intensive
 
 #grouping:
@@ -195,6 +216,7 @@ plot(net, "temporal", nonsig = "hide", rule = "and",
      layout = "spring", theme = "colorblind", alpha = .01,
      curve = 0.5, curveAll = TRUE,
      groups = grouping,
+     legend = FALSE,
      filename = "temporalnet", filetype = "png", width = 20, height = 20)
 
 #contemporaneous network:
@@ -202,11 +224,13 @@ plot(net, "contemporaneous", nonsig = "hide", rule = "and",
      layout = "spring", theme = "colorblind", alpha = .01,
      curve = 0.5, curveAll = FALSE, repulsion = 0.8,
      groups = grouping,
+     legend = FALSE,
      filename = "contempnet", filetype = "png", width = 20, height = 20)
 
-#between-subjects network:
+#between-person network:
 plot(net, "between", nonsig = "hide", rule = "and", 
      layout = "spring", theme = "colorblind", alpha = .01,
      curve = 0.5, curveAll = FALSE, repulsion = 0.8,
-     groups = grouping, 
+     groups = grouping,
+     legend = FALSE,
      filename = "betweennet", filetype = "png", width = 20, height = 20)
