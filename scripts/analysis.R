@@ -5,24 +5,32 @@
 library(tidyverse)
 library(mlVAR)
 library(flextable)
+library(lme4)
+library(lmerTest)
+library(multilevelTools)
 
 #loading baseline data:
 baseline_raw <- read.csv("./data/baseline_clean.csv")
 
 #loading and cleaning EMA data:
 ema_raw <- read.csv("./data/ema_clean.csv")
-ema_clean <- ema_raw %>%
+ema_raw <- ema_raw %>%
   mutate(core = rowMeans(select(ema_raw, starts_with("tpess")))) #computing mean score for 10-item TPESS
 
 #removing participants who responded to less than 21 EMAs
-occasion_count <- ema_clean %>%
+occasion_count <- ema_raw %>%
   group_by(id) %>%
   filter(has_data == "true") %>%
   count() %>%
   filter(n > 20)
-ema_clean <- ema_clean %>%
+
+ema_clean <- ema_raw %>%
   filter(id %in% occasion_count$id) %>% 
   select(id, time, day, occasion, nse, anh:core)
+
+ema_reliability <- ema_raw %>% 
+  filter(id %in% occasion_count$id) %>% 
+  select(id, time, day, occasion, starts_with("tpess"))
 
 #################################################################
 ##                    Baseline descriptives                    ##
@@ -71,6 +79,7 @@ mean(baseline_clean$age) %>%
   round(digits = 2)
 sd(baseline_clean$age) %>% 
   round(digits = 2)
+range(baseline_clean$age)
 
 baseline_clean %>% #breakdown of gender
   count(gender)
@@ -107,6 +116,16 @@ sd(baseline_excluded$tpess_mean) %>%
 
 t.test(baseline_clean$tpess_mean, baseline_excluded$tpess_mean,
        alternative = "two.sided")
+
+#multi-level model (can baseline TPESS scores predict daily mean TPESS scores?)
+mlm_baseline <- baseline_clean %>% 
+  select(id, tpess_mean)
+
+mlm_data <- ema_clean %>%
+  left_join(mlm_baseline, by = "id")
+
+mlm <- lmer(core ~ 1 + tpess_mean + (1 | id),
+            data = mlm_data)
 
 ##################################################################
 ##                       EMA descriptives                       ##
@@ -172,6 +191,12 @@ persondesc_table <- persondesc_data %>%
   autofit()
 #print(persondesc_table, preview = "docx")
 
+#using multilevelTools::omegaSEM to estimate between- and within-person reliability of the Brief TPESS
+items_brief_tpess <- ema_reliability %>% 
+  select(starts_with("tpess")) %>% 
+  names()
+omegaSEM(items_brief_tpess, id = "id", data = ema_reliability)
+
 #################################################################
 ##                       Detrending data                       ##
 #################################################################
@@ -205,13 +230,14 @@ vars <- colnames(ema_detrended[5:18])
 #              temporal = "correlated", contemporaneous = "correlated")
 # saveRDS(net, "./data/RDS/network_correlated.RDS")
 net <- readRDS("./data/RDS/network_correlated.RDS") #load RDS file instead; fitting network with temporal/contempraneous = "correlated" is extremely computationally intensive
-
+ 
 #grouping:
 grouping <- list("NSE" = c(1),
                  "Symptoms" = c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13),
                  "TPESS" = c(14))
 
 #temporal network:
+summary_temporal <- summary(net)$temporal
 plot(net, "temporal", nonsig = "hide", rule = "and", 
      layout = "spring", theme = "colorblind", alpha = .01,
      curve = 0.5, curveAll = TRUE,
@@ -220,6 +246,7 @@ plot(net, "temporal", nonsig = "hide", rule = "and",
      filename = "temporalnet", filetype = "png", width = 20, height = 20)
 
 #contemporaneous network:
+summary_contemp <- summary(net)$contemporaneous
 plot(net, "contemporaneous", nonsig = "hide", rule = "and", 
      layout = "spring", theme = "colorblind", alpha = .01,
      curve = 0.5, curveAll = FALSE, repulsion = 0.8,
@@ -228,6 +255,7 @@ plot(net, "contemporaneous", nonsig = "hide", rule = "and",
      filename = "contempnet", filetype = "png", width = 20, height = 20)
 
 #between-person network:
+summary_between <- summary(net)$between
 plot(net, "between", nonsig = "hide", rule = "and", 
      layout = "spring", theme = "colorblind", alpha = .01,
      curve = 0.5, curveAll = FALSE, repulsion = 0.8,
