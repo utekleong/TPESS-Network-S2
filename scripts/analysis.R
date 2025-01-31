@@ -240,7 +240,7 @@ grouping <- list("NSE" = c(1),
 summary_temporal <- summary(net)$temporal
 plot(net, "temporal", nonsig = "hide", rule = "and", 
      layout = "spring", theme = "colorblind", alpha = .01,
-     curve = 0.5, curveAll = TRUE,
+     curve = 0.5, curveAll = FALSE,
      groups = grouping,
      legend = FALSE,
      filename = "temporalnet", filetype = "png", width = 20, height = 20)
