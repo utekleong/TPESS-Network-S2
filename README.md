@@ -1,4 +1,5 @@
-# Investigating the Within- and Between-person Associations Between a Transdiagnostic Core Vulnerability, Internalizing Symptoms, and Negative Situational Experiences: A Network Analysis
+# Investigating the Between- and Within-Person Associations among Core Cognitive Vulnerability, Internalizing Symptoms, and Negative Situational Experiences: A Longitudinal Network Analysis
+
 
 This repository contains the data and code for the study titled "Investigating the Within- and Between-person Associations Between a Transdiagnostic Core Vulnerability, Internalizing Symptoms, and Negative Situational Experiences: A Network Analysis". Deidentified data to replicate the analyses performed in this study are available in ./data. 
 
