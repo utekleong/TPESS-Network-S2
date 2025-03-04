@@ -1,4 +1,9 @@
-#loading required data
+#NOTE: Note that this script contains the code used to prepare the raw data for analysis. 
+#As the identified raw data will not be provided here, this file is not executable. 
+#It, however, should give the reader a sense of what was done to the original data file.
+
+
+#loading required packages
 library(tidyverse)
 
 #################################################################

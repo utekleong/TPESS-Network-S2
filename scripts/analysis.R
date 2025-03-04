@@ -7,7 +7,7 @@ library(mlVAR)
 library(flextable)
 library(lme4)
 library(lmerTest)
-library(multilevelTools)
+mllibrary(multilevelTools)
 
 #loading baseline data:
 baseline_raw <- read.csv("./data/baseline_clean.csv")
@@ -126,6 +126,7 @@ mlm_data <- ema_clean %>%
 
 mlm <- lmer(core ~ 1 + tpess_mean + (1 | id),
             data = mlm_data)
+summary(mlm)
 
 ##################################################################
 ##                       EMA descriptives                       ##
