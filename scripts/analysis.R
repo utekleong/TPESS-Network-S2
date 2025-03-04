@@ -224,6 +224,8 @@ ema_detrended[5:18] <- data_residuals[5:18]
 ##                      Network estimation                      ##
 ##################################################################
 # #fitting the network:
+nodelabels <- c("id", "time", "day", "occasion", "nse", "anh", "dep", "fail", "restless", "anx", "fear", "avoid", "socanx", "panic", "obse", "comp", "conc", "core")
+colnames(ema_detrended) <- nodelabels
 vars <- colnames(ema_detrended[5:18])
 # net <- mlVAR(ema_detrended, vars = vars,
 #              idvar = "id", dayvar = "day",
