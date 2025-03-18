@@ -7,7 +7,7 @@ library(mlVAR)
 library(flextable)
 library(lme4)
 library(lmerTest)
-mllibrary(multilevelTools)
+library(multilevelTools)
 
 #loading baseline data:
 baseline_raw <- read.csv("./data/baseline_clean.csv")
